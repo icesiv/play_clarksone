@@ -1,0 +1,6 @@
+{
+    "USERNAME": "",
+    "PASSWORD": "",
+    "DELETE_DB_RECORD_OLDER_THAN_DAYS": 14,
+    "UPDATE_INVENTORY_HOURS": 4
+}
