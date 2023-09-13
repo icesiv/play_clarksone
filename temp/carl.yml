@@ -1,0 +1,14 @@
+curl 'https://us.clarksone.com/Womens-All-Styles/c/w1/page-fragment?q=%3Arelevance&page=1' \
+  -H 'authority: us.clarksone.com' \
+  -H 'accept: */*' \
+  -H 'accept-language: en-BD,en-GB;q=0.9,en-US;q=0.8,en;q=0.7' \
+  -H 'cookie: anonymous-consents=%5B%5D; cookie-notification=NOT_ACCEPTED; cmTPSet=Y; CoreID6=30603330019316930321950&ci=90375373; BVBRANDID=ddd5a276-3fff-4c52-a806-334f26c47a83; CMAVID=none; BVImplmain_site=19339; BVBRANDSID=166fc89e-e333-45f9-be5e-0372ca2554d9; acceleratorSecureGUID=677c13e9a3acd9ae1e59b3f44f8de3984b8f8a3c; JSESSIONID=Y1-e9b1ed5b-231d-4af2-b249-165cd2f0eb85; 90375373_clogin=v=1&l=96386071694601505524&e=1694603386884; AWSALB=hRTam/25fooIomHIhPuUvDrZpo0ibP33prLDUrvw2NAbb6HXaJAQdPb6TGUq4WP9zOY3Jb9uyy9rMFqQnrEKHWfmCicFUuq9N4a0ELN7RK6rRkG3q1KKUqF+cXlN; AWSALBCORS=hRTam/25fooIomHIhPuUvDrZpo0ibP33prLDUrvw2NAbb6HXaJAQdPb6TGUq4WP9zOY3Jb9uyy9rMFqQnrEKHWfmCicFUuq9N4a0ELN7RK6rRkG3q1KKUqF+cXlN' \
+  -H 'referer: https://us.clarksone.com/clarks-us/en_US/USD/Womens-All-Styles/c/w1' \
+  -H 'sec-ch-ua: "Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36' \
+  --compressed
