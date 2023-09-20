@@ -1,6 +1,8 @@
 import constant
 import helpers
 from bs4 import BeautifulSoup
+import requests
+
 
 import asyncio
 from playwright.async_api import async_playwright
@@ -23,7 +25,7 @@ async def main():
         await page.wait_for_selector('div.carousel__component')
         # Now logged in
 
-        page.on("response", lambda response: check_response(response, page))
+        page.on("requestfinished", lambda response: check_response(response, page))
 
         # links = (helpers.load_items('product_link',
         #                             constant.EXCEL_LIST_FILE_PATH))
@@ -42,9 +44,13 @@ async def main():
 
 
 async def check_response(response, page):
+
     if "products.json" in response.url:
-        print(response.url)
-        print(response)
+        resp = requests.get(response.url)
+        print(resp.text)
+
+        # print(response.url)
+        # print(response)
         print("*" * 30)
 
     # if "page-fragment" in response.url:
