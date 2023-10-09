@@ -2,7 +2,7 @@ import constant
 import helpers
 from bs4 import BeautifulSoup
 import json
-
+import helpers
 
 import asyncio
 from playwright.async_api import async_playwright
@@ -13,6 +13,7 @@ async def main():
         # browser = await p.chromium.launch(headless=False, slow_mo=50)
         browser = await p.chromium.launch()
         page = await browser.new_page()
+        await page.route("**/*", helpers.block_aggressively)
 
         # await page.set_viewport_size({"width": 1280, "height": 1080})
         # page.route("**/*", helpers.block_aggressively)
@@ -30,21 +31,18 @@ async def main():
         print(">" * 30)
         # Now logged in
 
-        # page.on("requestfinished", lambda response: check_response(response, page))
-        # page.on("response", intercept_response)
-
         page.on('requestfinished', lambda request: handle_request(request))
 
+        # Load Items Link
         # links = (helpers.load_items('product_link',
         #                             constant.EXCEL_LIST_FILE_PATH))
 
         # for l in links:
         #     print(l)
-
-        item_url = "/clarks-us/en_US/USD/c/Leisa-Cacti-Q/p/26109039"
-
+        item_info = {}
+        item_url = "/clarks-us/en_US/USD/c/Nalle-Lace/p/26163570"
         full_url = constant.BASE_URL + item_url
-        # print("item_url: " + full_url)
+
         await page.goto(full_url)
 
 # https://api.bazaarvoice.com/data/products.json?passkey=aepj6ujftw8qdkioxfsc7k28s&apiversion=5.5&displaycode=19339-en_us&filter=id%3Aeq%3A26109039&limit=1&callback=bv_1111_19884
@@ -53,47 +51,62 @@ async def main():
 
 async def handle_request(request):
     if "futureStocks?productCodes=" in request.url:
+        print("futureStocks?productCodes=")
+        print("*" * 90)
         r = await request.response()
         print(await r.text())
+        print("*" * 90)
+
+    if "products.json" in request.url:
+        print("products.json")
+        r = await request.response()
+        print("*" * 90)
+        print(await r.text())
+        print("*" * 90)
+
+
+async def save_item():
+    if "futureStocks?productCodes=" in request.url:
+        print("futureStocks?productCodes=")
+        print("*" * 90)
+        r = await request.response()
+        print(await r.text())
+        print("*" * 90)
+
+    if "products.json" in request.url:
+        print("products.json")
+        r = await request.response()
+        print("*" * 90)
+        print(await r.text())
+        print("*" * 90)
 
 
 async def check_response(response, page):
 
-    # if "products.json" in response.url:
-    #     resp = requests.get(response.url)
-
-    #     if resp.status_code == 200:
-    #         print("*" * 30)
-
-    #         json_data = json.loads(
-    #             resp.text.split('(', 1)[1].rsplit(')', 1)[0])
-
-    #         product = json_data["Results"][0]
-
-    #         product_name = product["Name"]
-    #         product_image_url = product["ImageUrl"]
-    #         product_upc = product["UPCs"]
-
-    #         print("Name:", product_name)
-    #         print("ImageUrl:", product_image_url)
-    #         print("UPCs:", product_upc)
-
-    #     else:
-    #         print("got server code : " + str(resp.status_code))
-
-    #     print("*" * 90)
-
-    if "futureStocks?productCodes=" in response.url:
+    if "products.json" in response.url:
         resp = requests.get(response.url)
 
-        # if resp.status_code == 200:
-        #     print("*" * 30)
+        if resp.status_code == 200:
+            print("*" * 30)
 
-        #     print(resp.text)
-        # else:
-        #     print("got server code : " + str(resp.status_code))
+            json_data = json.loads(
+                resp.text.split('(', 1)[1].rsplit(')', 1)[0])
 
-        # print("*" * 90)
+            product = json_data["Results"][0]
+
+            product_name = product["Name"]
+            product_image_url = product["ImageUrl"]
+            product_upc = product["UPCs"]
+
+            print("Name:", product_name)
+            print("ImageUrl:", product_image_url)
+            print("UPCs:", product_upc)
+
+        else:
+            print("got server code : " + str(resp.status_code))
+
+        print("*" * 90)
+
 
 # ________________________________________________________________________________
 

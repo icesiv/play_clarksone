@@ -1,0 +1,68 @@
+{
+  "Limit": 1,
+  "Offset": 0,
+  "TotalResults": 1,
+  "Locale": "en_US",
+  "Results": [
+    {
+      "UPCs": [
+        "889308396271",
+        "889308396257",
+        "889308396240",
+        "889308396325",
+        "889308396202",
+        "889308396172",
+        "889308396226",
+        "889308396356",
+        "889308396332",
+        "889308396233",
+        "889308396219",
+        "889308396417",
+        "889308396363",
+        "889003525150",
+        "889308396288",
+        "889308396318",
+        "889308396394",
+        "889003525143",
+        "889308396189",
+        "889308396295",
+        "889308396196",
+        "889308396264",
+        "889308396424",
+        "889308396387",
+        "889308396301",
+        "889308396400",
+        "889308396370",
+        "889308396349"
+      ],
+      "Name": "Nalle Lace Navy Nubuck",
+      "Description": "Lightweight and ultra-comfortable, Nalle Lace in navy nubuck combines Clarks craftsmanship and heritage with innovative materials to create a sports-inspired sneaker. With lace-up detail and an easy-access zip, it brings a modern approach to a traditional casual shoe. Ideal for life on-the-go, reinforced leather and arch support team with a grippy, durable rubber sole, and a Contoured Comfort\u2122 footbed and breathable sheep-leather lining ensure cushioning in every step.",
+      "AttributesOrder": ["AVAILABILITY"],
+      "Attributes": {
+        "AVAILABILITY": {
+          "Id": "AVAILABILITY",
+          "Values": [{ "Value": "True", "Locale": null }]
+        }
+      },
+      "ImageUrl": "https://clarks.scene7.com/is/image/Pangaea2Build/26163570_W_1",
+      "Id": "26163570",
+      "CategoryId": "BV_MISCELLANEOUS_CATEGORY",
+      "BrandExternalId": "Clarks",
+      "Brand": { "Id": "Clarks", "Name": "Clarks" },
+      "Active": true,
+      "ProductPageUrl": "https://www.clarksusa.com/c/Nalle-Lace/p/26163570",
+      "Disabled": false,
+      "ReviewIds": [],
+      "ManufacturerPartNumbers": [],
+      "FamilyIds": [],
+      "QuestionIds": [],
+      "ISBNs": [],
+      "EANs": [],
+      "StoryIds": [],
+      "ModelNumbers": []
+    }
+  ],
+  "Includes": {},
+  "HasErrors": false,
+  "Errors": []
+}
