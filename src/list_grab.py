@@ -10,21 +10,22 @@ class ListGrab:
 
     def main(self):
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=False, slow_mo=50)
+            # browser = p.chromium.launch(headless=False, slow_mo=50)
+            browser = p.chromium.launch()
             context = browser.new_context()
 
             page = context.new_page()
-            page.set_viewport_size({"width": 1280, "height": 1080})
+            # page.set_viewport_size({"width": 1280, "height": 1080})
             page.route("**/*", helpers.block_aggressively)
 
             page = helpers.login(
                 page, self.configs['USERNAME'], self.configs['PASSWORD']
             )
 
-            self.listing(page, 53, 55, constant.get_url(
+            self.listing(page, 1, 140, constant.get_url(
                 'woman_list_url'), "woman")
 
-            self.listing(page, 50, 52, constant.get_url(
+            self.listing(page, 1, 47, constant.get_url(
                 'man_list_url'), "man")
 
     def listing(self, page, start_page, last_page, url, gender):

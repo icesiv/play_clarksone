@@ -1,4 +1,6 @@
+requests
+openpyxl
 playwright
 beautifulsoup4
 pandas
-requests
+schedule
