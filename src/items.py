@@ -1,13 +1,14 @@
 class Item():
     upc = ""
+    sku = ""
+    title = ""
+    link = ""
     size = ""
     price = ""
     available = ""
     available_next = ""
     features = ""
 
-    def __init__(self, sku, title, product_link):
-        self.sku = sku
-        self.title = title
-        self.link = product_link
+    def __init__(self, upc):
+        self.upc = upc
     pass

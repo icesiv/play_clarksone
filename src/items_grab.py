@@ -52,73 +52,121 @@ def get_color(c):
         return c.split(" |")[0].strip()  
     except:
         return "-"
+        
+def get_images(sku):
+    img_arr = []
+    try:
+        for i in range(1,8):
+            img_arr.append(f"https://clarks.scene7.com/is/image/Pangaea2Build/{sku}_W_{i}?fmt=pjpg&wid=1024")
+        return img_arr  
+    except:
+        return None
     
+def get_feature(html):
+    try:
+        soup = BeautifulSoup(html, 'html.parser')    
+
+        product_details_tab = soup.find('div', class_='pdp_details_cmp_product_details_tab')
+        feature_info_containers = product_details_tab.find_all('div', class_='pdp_details_cmp_product_details_tab_features_info')
+
+        feature_details = {}
+        for feature_info in feature_info_containers:
+            feature_name = feature_info.find('div', class_='pdp_details_cmp_product_details_tab_feature_name').get_text(strip=True)
+            feature_value = feature_info.find('div', class_='pdp_details_cmp_product_details_tab_feature_value').get_text(strip=True)
+            feature_details[feature_name] = feature_value
+
+        # Print the feature details
+        # for feature_name, feature_value in feature_details.items():
+        #     print(f"{feature_name}: {feature_value}")
+        # Sole Material
+        # Upper Material
+        # Lining Material
+        # Heel Height
+        # Fastening
+        # Boot Shaft Height 
+        return feature_details
+    except:
+        return "-"
+
+def get_upc(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    size_elements = soup.find_all('div', class_='c-order_form_grid_body_input')
+
+    for size_element in size_elements:
+        # Extract size
+        size = size_element.find('span', class_='c-order_form_grid_body_size_digit').text.strip()
+
+        # Extract price
+        price = size_element.find('input', type='number')['data-price']
+
+        # Extract product availability
+        availability = size_element.find('span', class_='c-order_form_grid_body_availability_digit').text.strip()
+
+        print(f"Size: {size}, Price: ${price}, Availability: {availability}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # soup = BeautifulSoup(html, 'html.parser')
+    
+    # .c-order_form_grid_body_entry
+    
+    # product_containers = soup.find_all('div', class_='c-order_form_product')
+    
+    # for container in product_containers:
+    #     item = Item(container['data-pc'])
+    #     item.size = container.find('div', class_='c-order_form_product_size_digit').text
+    #     item.price = container.find('div', class_='c-order_form_product_price_digit')['data-price']
+    #     print (item.upc , item.size)
+
+    #     availability_div = container.find('div', class_='c-order_form_product_available')
+    #     product_available = availability_div.find('div', class_='c-order_form_product_availability_digit').get_text(strip=True)
+        
+    #     try:
+    #         a = product_available.split("Next Available")
+    #         item.available = a[0]
+    #         item.available_next = a[1]
+    #     except:
+    #         item.available = product_available
+    #         item.available_next = "-"
+        
+        # print("item.available",item.available)
+        # print("item.available_next",item.available_next)
+    
+    
+    
+    pass    
 def get_details(page, sku, title, msrp, link):
     # link = "/clarks-us/en_US/USD/c/Wallabee-/p/26155544"
-    link = "/clarks-us/en_US/USD/c/Cheyn-Zoe/p/26154389"
+    # link = "/clarks-us/en_US/USD/c/Cheyn-Zoe/p/26154389"
+    link = "/clarks-us/en_US/USD/c/Cielo-Charm/p/26171524"
     
     full_url = constant.BASE_URL + link
     page.goto(full_url, timeout=350000)
     wait_for_page_to_load(page)
     
     color = get_color(page.locator("div.product-name").text_content())
+    feature_details = get_feature(page.inner_html("(//div[@class='pdp_details_tabs'])[1]"))
+    images = get_images(sku) 
     
-    # html = page.inner_html("#c-order_form_product_container_M")
-    # soup = BeautifulSoup(html, 'html.parser')
-    
-    
-    
-    
-    html = page.inner_html("(//div[@class='pdp_details_tabs'])[1]")
-    soup = BeautifulSoup(html, 'html.parser')    
-
-    product_details_tab = soup.find('div', class_='pdp_details_cmp_product_details_tab')
-    feature_info_containers = product_details_tab.find_all('div', class_='pdp_details_cmp_product_details_tab_features_info')
-
-    feature_details = {}
-    for feature_info in feature_info_containers:
-        feature_name = feature_info.find('div', class_='pdp_details_cmp_product_details_tab_feature_name').get_text(strip=True)
-        feature_value = feature_info.find('div', class_='pdp_details_cmp_product_details_tab_feature_value').get_text(strip=True)
-        feature_details[feature_name] = feature_value
-
-    # Print the feature details
-    # for feature_name, feature_value in feature_details.items():
-    #     print(f"{feature_name}: {feature_value}")
-    # Sole Material
-    # Upper Material
-    # Lining Material
-    # Heel Height
-    # Fastening
-    # Boot Shaft Height
-    
-    images = "https://clarks.scene7.com/is/image/Pangaea2Build/26161277_W_1?fmt=pjpg&wid=1024" 
-    
-    # Find all product containers
-    product_containers = soup.find_all('div', class_='c-order_form_product')
-    
-    for container in product_containers:
-        item = Item(sku, title, link, msrp)
-        item.upc = container['data-pc']
-        item.size = container.find('div', class_='c-order_form_product_size_digit').text
-        item.price = container.find('div', class_='c-order_form_product_price_digit')['data-price']
-        print (item.upc , item.size)
-
-        availability_div = container.find('div', class_='c-order_form_product_available')
-        product_available = availability_div.find('div', class_='c-order_form_product_availability_digit').get_text(strip=True)
+    # items = get_upc(page.inner_html("#c-order_form_product_container_M"))
+    items = get_upc(page.inner_html(".c-order_form_grid"))
         
-        try:
-            a = product_available.split("Next Available")
-            item.available = a[0]
-            item.available_next = a[1]
-        except:
-            item.available = product_available
-            item.available_next = "-"
-        
-        # print("item.available",item.available)
-        # print("item.available_next",item.available_next)
-        
-        # TODO : Save Item
-        
+    # TODO : Save Items        
     print("*" * 20)
             
 def main():
@@ -130,10 +178,14 @@ def main():
         page.route("**/*", helpers.block_aggressively)
 
         page = helpers.login(
-            page, configs['USERNAME'], configs['PASSWORD']
+            page, 
+            configs['USERNAME'], 
+            configs['PASSWORD']
         )
         
-        if page is None: sys.exit()
+        if page is None: 
+            print("error login")
+            sys.exit()
        
         list_items = load_items()
         total = len(list_items)
