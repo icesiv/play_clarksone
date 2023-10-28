@@ -8,35 +8,30 @@ import pandas as pd
 
 
 def login(page, user, password):
-    while True:
-        ## login page
-        print("<" * 30)
-        print("login process start")
+    print("<" * 30)
+    print("login process start")
+    
+    try:
+        page.goto(constant.get_url('login'), timeout=280000)
+        page.fill('input#j_username', user)
+        page.fill('input#j_password', password)
+        page.click("button[type=submit]")
+        page.wait_for_selector('div.carousel__component', timeout=280000)
         
-        try:
-            page.goto(constant.get_url('login'), timeout=280000)
-            page.fill('input#j_username', user)
-            page.fill('input#j_password', password)
-            page.click("button[type=submit]")
-            page.wait_for_selector('div.carousel__component', timeout=280000)
-            
-            print("login success")
-            print(">" * 30)
-            
-            return page
-        except:
-            print("login timeout..")
-            
-        print("trying to login again")
+        print("login success")
+        print(">" * 30)
+        
+        return page
+    except:
+        print("login timeout..")
+        return None
 
 def get_file(filename):
     return os.path.join(os.path.dirname(__file__), filename)
 
-
 def load_config():
     with open(get_file('../config.json')) as f:
         return json.load(f)
-
 
 def wait(min, max = 1):
     if min > max:
@@ -45,14 +40,12 @@ def wait(min, max = 1):
     random_seconds = random.uniform(1, max)
     time.sleep(random_seconds)
 
-
 def current_time():
     return time.time()
 
-
 def block_aggressively(route):
     if (route.request.resource_type in constant.RESOURCE_EXCLUSTIONS):
-        print("XXX -->" ,route.request.url)
+        # print("XXX -->" ,route.request.url)
         route.abort()
     else:
         route.continue_()
@@ -71,14 +64,3 @@ def save_to_excel(new_data):
 
     print(
         f'Data has been appended to {constant.EXCEL_FILE_PATH}')
-
-
-def load_items(column_name, file_name):
-    df = pd.read_excel(file_name)
-
-    if column_name in df.columns:
-        column_data = df[column_name].tolist()
-        return (column_data)
-    else:
-        print(f"Column '{column_name}' not found in the Excel file.")
-        return None

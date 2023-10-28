@@ -1,55 +1,16 @@
+import sys 
 import json
 import constant
 import helpers
+import pandas as pd
+
+from items import Item 
 
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
-def save_item():
-    if "futureStocks?productCodes=" in request.url:
-        print("futureStocks?productCodes=")
-        print("*" * 90)
-        r = request.response()
-        print(r.text())
-        print("*" * 90)
-
-    if "products.json" in request.url:
-        print("products.json")
-        r = request.response()
-        print("*" * 90)
-        print(r.text())
-        print("*" * 90)
-
 def wait_for_page_to_load(page):
-    page.wait_for_selector('body', timeout=350000)
-
-
-def check_response(response, page):
-
-    if "products.json" in response.url:
-        resp = requests.get(response.url)
-
-        if resp.status_code == 200:
-            print("*" * 30)
-
-            json_data = json.loads(
-                resp.text.split('(', 1)[1].rsplit(')', 1)[0])
-
-            product = json_data["Results"][0]
-
-            product_name = product["Name"]
-            product_image_url = product["ImageUrl"]
-            product_upc = product["UPCs"]
-
-            print("Name:", product_name)
-            print("ImageUrl:", product_image_url)
-            print("UPCs:", product_upc)
-
-        else:
-            print("got server code : " + str(resp.status_code))
-
-        print("*" * 90)
-
+    page.wait_for_selector('body')
 
 def handle_request(request):
     # print(request.url)
@@ -68,57 +29,123 @@ def handle_request(request):
         print(r.text())
         print("*" * 90)
 
+def load_items():
+    columns_to_read = ['title','product_link','sku','msrp']
+    
+    try:
+        df = pd.read_excel(constant.EXCEL_FILE_PATH, usecols=columns_to_read)
+        max_rows, max_cols = df.shape
+        print(f'Total SKU: {max_rows}')
+        if len(df) > 0:
+            return df
+        else:
+            print("No Rows in the Excel file.")
+            return None
+        
+    except Exception:
+        print("Column not found in the Excel file.")
+        return None
+    
+def get_color(c):
+    try:
+        c = c.replace("\n", "") 
+        return c.split(" |")[0].strip()  
+    except:
+        return "-"
+    
+def get_details(page, sku, title, msrp, link):
+    # link = "/clarks-us/en_US/USD/c/Wallabee-/p/26155544"
+    link = "/clarks-us/en_US/USD/c/Cheyn-Zoe/p/26154389"
+    
+    full_url = constant.BASE_URL + link
+    page.goto(full_url, timeout=350000)
+    wait_for_page_to_load(page)
+    
+    color = get_color(page.locator("div.product-name").text_content())
+    
+    # html = page.inner_html("#c-order_form_product_container_M")
+    # soup = BeautifulSoup(html, 'html.parser')
+    
+    
+    
+    
+    html = page.inner_html("(//div[@class='pdp_details_tabs'])[1]")
+    soup = BeautifulSoup(html, 'html.parser')    
+
+    product_details_tab = soup.find('div', class_='pdp_details_cmp_product_details_tab')
+    feature_info_containers = product_details_tab.find_all('div', class_='pdp_details_cmp_product_details_tab_features_info')
+
+    feature_details = {}
+    for feature_info in feature_info_containers:
+        feature_name = feature_info.find('div', class_='pdp_details_cmp_product_details_tab_feature_name').get_text(strip=True)
+        feature_value = feature_info.find('div', class_='pdp_details_cmp_product_details_tab_feature_value').get_text(strip=True)
+        feature_details[feature_name] = feature_value
+
+    # Print the feature details
+    # for feature_name, feature_value in feature_details.items():
+    #     print(f"{feature_name}: {feature_value}")
+    # Sole Material
+    # Upper Material
+    # Lining Material
+    # Heel Height
+    # Fastening
+    # Boot Shaft Height
+    
+    images = "https://clarks.scene7.com/is/image/Pangaea2Build/26161277_W_1?fmt=pjpg&wid=1024" 
+    
+    # Find all product containers
+    product_containers = soup.find_all('div', class_='c-order_form_product')
+    
+    for container in product_containers:
+        item = Item(sku, title, link, msrp)
+        item.upc = container['data-pc']
+        item.size = container.find('div', class_='c-order_form_product_size_digit').text
+        item.price = container.find('div', class_='c-order_form_product_price_digit')['data-price']
+        print (item.upc , item.size)
+
+        availability_div = container.find('div', class_='c-order_form_product_available')
+        product_available = availability_div.find('div', class_='c-order_form_product_availability_digit').get_text(strip=True)
+        
+        try:
+            a = product_available.split("Next Available")
+            item.available = a[0]
+            item.available_next = a[1]
+        except:
+            item.available = product_available
+            item.available_next = "-"
+        
+        # print("item.available",item.available)
+        # print("item.available_next",item.available_next)
+        
+        # TODO : Save Item
+        
+    print("*" * 20)
+            
 def main():
      with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=50)
+        browser = p.chromium.launch(headless=False)
         # browser = p.chromium.launch()
         page = browser.new_page()
-        # page.set_viewport_size({"width": 1280, "height": 1080})
-        # page.route("**/*", helpers.block_aggressively)
+        page.set_viewport_size({"width": 1280, "height": 1080})
+        page.route("**/*", helpers.block_aggressively)
 
         page = helpers.login(
             page, configs['USERNAME'], configs['PASSWORD']
         )
-        # Now logged in
-
-        # Load Items Link
-        # links = (helpers.load_items('product_link',
-        #                             constant.EXCEL_LIST_FILE_PATH))
-
-        # for l in links:
-        #     print(l)
-        item_info = {}
-        item_url = "/clarks-us/en_US/USD/c/Wallabee-/p/26155544"
-        full_url = constant.BASE_URL + item_url
-
-        page.goto(full_url)
         
-        wait_for_page_to_load(page)
-        print("Page loaded successfully!")
+        if page is None: sys.exit()
+       
+        list_items = load_items()
+        total = len(list_items)
         
-        html = page.inner_html("c-order_form_product_container_M")
-        soup = BeautifulSoup(html, 'html.parser')
+        for index, row in list_items.iterrows():
+            print(f"Getting Item {index+1} of {total}")
+            get_details(page, row['sku'],row['title'],row['msrp'],row['product_link'])
+            break
         
-        # Find all product containers
-        product_containers = soup.find_all('div', class_='c-order_form_product')
 
-        for container in product_containers:
-            # Extract data from each product container
-            data_pc = container['data-pc']
-            size = container.find('div', class_='c-order_form_product_size_digit').text
-            price = container.find('div', class_='c-order_form_product_price_digit')['data-price']
-            product_available = container.find('div', class_='c-order_form_product_available').text.strip()
-
-            # Print the extracted information for each product
-            print(f"data-pc: {data_pc}")
-            print(f"Size: {size}")
-            print(f"Price: {price}")
-            print(f"Product Available: {product_available}")
-            print("*" * 20)
-
-        
-        
-        
+        sys.exit()
+                
         print("--------------------------------------------------")
         helpers.wait(30)
 
