@@ -64,3 +64,18 @@ def save_to_excel(new_data):
 
     print(
         f'Data has been appended to {constant.EXCEL_FILE_PATH}')
+    
+def save_items_to_excel(data):
+    new_df = pd.DataFrame(data)
+
+    try:
+        existing_df = pd.read_excel(constant.EXCEL_ITEMS_FILE_PATH)
+        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+    except FileNotFoundError:
+        combined_df = new_df
+
+    combined_df.to_excel(constant.EXCEL_ITEMS_FILE_PATH, index=False)
+
+    print(
+        f'Data has been appended to {constant.EXCEL_ITEMS_FILE_PATH}')
+

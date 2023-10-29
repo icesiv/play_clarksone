@@ -1,5 +1,5 @@
 import sys 
-import json
+import re
 import constant
 import helpers
 import pandas as pd
@@ -11,23 +11,6 @@ from bs4 import BeautifulSoup
 
 def wait_for_page_to_load(page):
     page.wait_for_selector('body')
-
-def handle_request(request):
-    # print(request.url)
-    
-    if "futureStocks?productCodes=" in request.url:
-        print("futureStocks?productCodes=")
-        print("*" * 90)
-        r = request.response()
-        print(r.text())
-        print("*" * 90)
-
-    if "products.json" in request.url:
-        print("products.json")
-        r = request.response()
-        print("*" * 90)
-        print(r.text())
-        print("*" * 90)
 
 def load_items():
     columns_to_read = ['title','product_link','sku','msrp']
@@ -74,82 +57,88 @@ def get_feature(html):
             feature_name = feature_info.find('div', class_='pdp_details_cmp_product_details_tab_feature_name').get_text(strip=True)
             feature_value = feature_info.find('div', class_='pdp_details_cmp_product_details_tab_feature_value').get_text(strip=True)
             feature_details[feature_name] = feature_value
-
-        # Print the feature details
-        # for feature_name, feature_value in feature_details.items():
-        #     print(f"{feature_name}: {feature_value}")
+        
+        feature_detail = ""
+        for feature_name, feature_value in feature_details.items():
+            feature_detail += (f"{feature_name}: {feature_value}; ")
+            
         # Sole Material
         # Upper Material
         # Lining Material
         # Heel Height
         # Fastening
         # Boot Shaft Height 
-        return feature_details
+
+        return feature_detail
     except:
         return "-"
 
-def get_upc(html):
+def get_category(page):
+    script_content = page.evaluate('''() => {
+        const scriptTags = document.getElementsByTagName('script');
+        for (const scriptTag of scriptTags) {
+            if (scriptTag.type === 'text/javascript' && scriptTag.textContent.includes("'category': '")) {
+                return scriptTag.textContent;
+            }
+        }
+        return null;
+    }''')
+
+    category_match = re.search(r"'category': '([^']+)'", script_content)
+    brand_match = re.search(r"'brand': '([^']+)'", script_content)
+
+    if category_match:
+        category = category_match.group(1)
+        print("Category:", category)
+    else:
+        print("Category not found in JavaScript code.")
+
+    if brand_match:
+        brand = brand_match.group(1)
+        print("Brand:", brand)
+    else:
+        print("Brand not found in JavaScript code.")
+        
+    return (category , brand)
+
+def get_upc(page, key):
+    items = []
+    
+    try:
+        html = page.inner_html(key,timeout=3000)
+    except:
+        return items
+    
     soup = BeautifulSoup(html, 'html.parser')
-    size_elements = soup.find_all('div', class_='c-order_form_grid_body_input')
-
-    for size_element in size_elements:
-        # Extract size
-        size = size_element.find('span', class_='c-order_form_grid_body_size_digit').text.strip()
-
-        # Extract price
-        price = size_element.find('input', type='number')['data-price']
-
-        # Extract product availability
-        availability = size_element.find('span', class_='c-order_form_grid_body_availability_digit').text.strip()
-
-        print(f"Size: {size}, Price: ${price}, Availability: {availability}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # soup = BeautifulSoup(html, 'html.parser')
+    product_containers = soup.find_all('div', class_='c-order_form_product')
     
-    # .c-order_form_grid_body_entry
     
-    # product_containers = soup.find_all('div', class_='c-order_form_product')
-    
-    # for container in product_containers:
-    #     item = Item(container['data-pc'])
-    #     item.size = container.find('div', class_='c-order_form_product_size_digit').text
-    #     item.price = container.find('div', class_='c-order_form_product_price_digit')['data-price']
-    #     print (item.upc , item.size)
-
-    #     availability_div = container.find('div', class_='c-order_form_product_available')
-    #     product_available = availability_div.find('div', class_='c-order_form_product_availability_digit').get_text(strip=True)
+    for container in product_containers:
+        item = Item(container['data-pc'])
+        try:
+            item.size = container.find('div', class_='c-order_form_product_size_digit').text
+            item.price = container.find('div', class_='c-order_form_product_price_digit')['data-price']
+           
+            availability_div = container.find('div', class_='c-order_form_product_available')
+            product_available = availability_div.find('div', class_='c-order_form_product_availability_digit').get_text(strip=True)
+            
+            try:
+                a = product_available.split("Next Available")
+                item.available = a[0]
+                item.available_next = a[1]
+            except:
+                item.available = product_available
+                item.available_next = "-"
+        except:
+            print ("UPC Error: ",item.upc)
+            continue
+            
+        items.append(item)
         
-    #     try:
-    #         a = product_available.split("Next Available")
-    #         item.available = a[0]
-    #         item.available_next = a[1]
-    #     except:
-    #         item.available = product_available
-    #         item.available_next = "-"
+    return items
+            
         
-        # print("item.available",item.available)
-        # print("item.available_next",item.available_next)
-    
-    
-    
-    pass    
+        
 def get_details(page, sku, title, msrp, link):
     # link = "/clarks-us/en_US/USD/c/Wallabee-/p/26155544"
     # link = "/clarks-us/en_US/USD/c/Cheyn-Zoe/p/26154389"
@@ -163,11 +152,44 @@ def get_details(page, sku, title, msrp, link):
     feature_details = get_feature(page.inner_html("(//div[@class='pdp_details_tabs'])[1]"))
     images = get_images(sku) 
     
-    # items = get_upc(page.inner_html("#c-order_form_product_container_M"))
-    items = get_upc(page.inner_html(".c-order_form_grid"))
-        
+    itemsN = get_upc(page, "#c-order_form_product_container_N")
+    itemsM = get_upc(page, "#c-order_form_product_container_M")
+    itemsW = get_upc(page, "#c-order_form_product_container_W")
+    
+    category_n_brand = get_category(page)
+    
+    
+    save_items(itemsN, sku, title, msrp, link,color,category_n_brand,feature_details,images)
+    save_items(itemsM, sku, title, msrp, link,color,category_n_brand,feature_details,images)
+    save_items(itemsW, sku, title, msrp, link,color,category_n_brand,feature_details,images)
+            
     # TODO : Save Items        
     print("*" * 20)
+
+def save_items(items: Item, sku, title, msrp, link,color,category_n_brand,feature_details,images):
+    if len(items) < 1:
+        return
+    
+    for item in items:
+        item.sku = sku
+        item.title = title
+        item.msrp = msrp
+        item.link = link
+        item.color = color
+        item.categorys = category_n_brand[0]
+        item.brand = category_n_brand[1]
+        item.feature_detail = feature_details
+        
+        item.image_1 = images[0]
+        item.image_2 = images[1]
+        item.image_3 = images[2]
+        item.image_4 = images[3]
+        item.image_5 = images[4]
+        item.image_6 = images[5]
+        item.image_7 = images[6]
+            
+        item.save_data()
+        # print("*" * 25)
             
 def main():
      with sync_playwright() as p:
@@ -193,6 +215,7 @@ def main():
         for index, row in list_items.iterrows():
             print(f"Getting Item {index+1} of {total}")
             get_details(page, row['sku'],row['title'],row['msrp'],row['product_link'])
+        
             break
         
 
