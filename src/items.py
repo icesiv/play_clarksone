@@ -5,6 +5,7 @@ class Item():
     sku = ""
     title = ""
     link = ""
+    fit = ""
     size = ""
     price = ""
     available = ""
@@ -34,7 +35,7 @@ class Item():
             "UPC": [self.upc],
             "SKU": [self.sku],
             "Title": [self.title],
-            "Link": [self.link],
+            "Fit": [self.fit],
             "Size": [self.size],
             "Price": [self.price],
             "Available": [self.available],
@@ -45,6 +46,7 @@ class Item():
             "Categorys": [self.categorys],
             "Brand": [self.brand],
             "Feature Detail": [self.feature_detail],
+            "Link": [self.link],
             "Image 1": [self.image_1],
             "Image 2": [self.image_2],
             "Image 3": [self.image_3],

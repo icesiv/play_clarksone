@@ -89,15 +89,21 @@ def get_category(page):
 
     if category_match:
         category = category_match.group(1)
-        print("Category:", category)
+        # print("Category:", category)
+        
+        category = category.replace("Fit,","")
+        category = category.replace("Size,","")
+        category = category.replace("Color,","")
     else:
-        print("Category not found in JavaScript code.")
+        category = "-"
+        # print("Category not found in JavaScript code.")
 
     if brand_match:
         brand = brand_match.group(1)
-        print("Brand:", brand)
+        # print("Brand:", brand)
     else:
-        print("Brand not found in JavaScript code.")
+        brand = "-"
+        # print("Brand not found in JavaScript code.")
         
     return (category , brand)
 
@@ -136,13 +142,11 @@ def get_upc(page, key):
         items.append(item)
         
     return items
-            
-        
-        
+                    
 def get_details(page, sku, title, msrp, link):
     # link = "/clarks-us/en_US/USD/c/Wallabee-/p/26155544"
     # link = "/clarks-us/en_US/USD/c/Cheyn-Zoe/p/26154389"
-    link = "/clarks-us/en_US/USD/c/Cielo-Charm/p/26171524"
+    # link = "/clarks-us/en_US/USD/c/Cielo-Charm/p/26171524"
     
     full_url = constant.BASE_URL + link
     page.goto(full_url, timeout=350000)
@@ -159,20 +163,20 @@ def get_details(page, sku, title, msrp, link):
     category_n_brand = get_category(page)
     
     
-    save_items(itemsN, sku, title, msrp, link,color,category_n_brand,feature_details,images)
-    save_items(itemsM, sku, title, msrp, link,color,category_n_brand,feature_details,images)
-    save_items(itemsW, sku, title, msrp, link,color,category_n_brand,feature_details,images)
-            
-    # TODO : Save Items        
-    print("*" * 20)
+    save_items(itemsN, sku, 'N', title, msrp, link,color,category_n_brand,feature_details,images)
+    save_items(itemsM, sku, 'M', title, msrp, link,color,category_n_brand,feature_details,images)
+    save_items(itemsW, sku, 'W', title, msrp, link,color,category_n_brand,feature_details,images)
 
-def save_items(items: Item, sku, title, msrp, link,color,category_n_brand,feature_details,images):
+
+def save_items(items: Item, sku, fit, title, msrp, link,color,category_n_brand,feature_details,images):
     if len(items) < 1:
         return
     
     for item in items:
         item.sku = sku
         item.title = title
+        item.fit = fit
+        
         item.msrp = msrp
         item.link = link
         item.color = color
@@ -189,12 +193,11 @@ def save_items(items: Item, sku, title, msrp, link,color,category_n_brand,featur
         item.image_7 = images[6]
             
         item.save_data()
-        # print("*" * 25)
             
 def main():
      with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        # browser = p.chromium.launch()
+        # browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch()
         page = browser.new_page()
         page.set_viewport_size({"width": 1280, "height": 1080})
         page.route("**/*", helpers.block_aggressively)
@@ -215,15 +218,10 @@ def main():
         for index, row in list_items.iterrows():
             print(f"Getting Item {index+1} of {total}")
             get_details(page, row['sku'],row['title'],row['msrp'],row['product_link'])
-        
-            break
-        
-
-        sys.exit()
-                
-        print("--------------------------------------------------")
-        helpers.wait(30)
-
+            print("*" * 20)
+            
+            if index > 10:
+                break
 # ________________________________________________________________________________
 
 configs = helpers.load_config()

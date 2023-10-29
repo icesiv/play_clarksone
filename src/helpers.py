@@ -76,6 +76,3 @@ def save_items_to_excel(data):
 
     combined_df.to_excel(constant.EXCEL_ITEMS_FILE_PATH, index=False)
 
-    print(
-        f'Data has been appended to {constant.EXCEL_ITEMS_FILE_PATH}')
-
