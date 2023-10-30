@@ -1,16 +1,8 @@
 # ToDo
-For the first bot you're working on. Have it look like this please few things have been changed. Bot scraps in to only 1 Excel file , Bat replaces old scrap with new scrap and runs automatically
-
-
-
-
-The crawler should convert the data in to an Excel sheet with this information and format 3 times a day. 
-
-Key Points before you start this project.
-
-- Scraper needs to collect SKU , Style ,UPC , Quantity Availability , Title , Cost , MSRP. It doesn't hurt to add more information you can see the scrapper I sent you for reference.
-- Scraper needs to convert the above to Excel sheet
+- 1 Excel file , Bat replaces old scrap with new scrap
 - Scraper has to run twice a day
+- runs / resume auto
+- Scraper needs to collect SKU , Style ,UPC , Quantity Availability , Title , Cost , MSRP. It doesn't hurt to add more information you can see the scrapper I sent you for reference.
 - Try to make it as similar as you can to our current scrapper.
 
 

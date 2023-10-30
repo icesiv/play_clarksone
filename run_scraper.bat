@@ -1,2 +1,2 @@
-env\scripts\python.exe src\clarksone_grab.py
+env\scripts\python.exe src\clarksone.py
 @pause
