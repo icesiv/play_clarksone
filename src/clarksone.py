@@ -39,6 +39,17 @@ def current_time_text():
     date_time = now.strftime("%m-%d-%Y %H-%M")
     return date_time
 
+def remain_time_text(rs):
+    if(rs<1):
+       return "00:00:00" 
+    hours, remainder = divmod(rs, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    
+    hours = int(hours)
+    minutes = int(minutes)
+    seconds = int(seconds)
+    return f"{hours:02}:{minutes:02}:{seconds:02}"
+
 def block_aggressively(route):
     RESOURCE_EXCLUSTIONS = ['image', 'stylesheet', 'font']
     
@@ -55,7 +66,7 @@ def login(page):
     print("<" * 30)
     print("login process start")
 
-    user = configs['USERNAME'], 
+    user = configs['USERNAME'] 
     password = configs['PASSWORD']
     
     try:
@@ -74,18 +85,80 @@ def login(page):
         return None
     
 # -----------------------------------------------------
+# Listing Functions
+# -----------------------------------------------------
+
+def hangle_listing(page, start_page, last_page, url, gender):
+    for page_num in range(start_page, last_page+1):
+        print("Processing page", page_num)
+        list_url = url + str(page_num)
+        html = load_list_page(page, list_url)
+        
+        if not html:
+            continue
+        
+        if not parse_items(html, gender, page_num):
+            break
+
+def load_list_page(page, url):
+    try:
+        page.goto(url, timeout=280000)
+        page.is_visible('div.product-tile')
+        return page.inner_html('.product__listing-page')
+    except:
+        print("Error: Problem in URL. ",url)
+        return None
+
+def parse_items(html, gender, page_num):
+    soup = BeautifulSoup(html, 'html.parser')
+    product_tiles = soup.find_all(class_='product-tile')
+
+    if len(product_tiles) < 1:
+        return False
+
+    data_arr = []
+
+    for product in product_tiles:
+        title = product.find(class_='product-tile--name').text.strip()
+        product_link = product.find(class_='product-tile--link')['href']
+        sku = product.find(class_='product-tile--sku').text.strip()
+        price = product.find(class_='product-tile--price').text.strip()
+
+        price_div = product.find(class_='product-tile--price')
+        if price_div is not None:
+            msrp = price_div.text.strip()
+        else:
+            msrp = "-"
+
+        data = {
+            "title": title,
+            "product_link": product_link,
+            "sku": sku,
+            "price": price,
+            "msrp": msrp,
+            "list_page_num": page_num,
+            "for": gender
+        }
+
+        data_arr.append(data)
+
+    helpers.save_to_excel(data_arr)
+    return True
+
+# -----------------------------------------------------
 # Main Function
 # -----------------------------------------------------
 
 def start_scrap():
     start_time = time.time()
+    print("\n\n")
     print("Starting .. ")
     
     try:
         with sync_playwright() as p:
-            # browser = p.chromium.launch(headless=False, slow_mo=50)
+            browser = p.chromium.launch(headless=False, slow_mo=50)
             # browser = p.chromium.launch(headless=False)
-            browser = p.chromium.launch()
+            # browser = p.chromium.launch()
         
             page = browser.new_page()
             page.set_viewport_size({"width": 1280, "height": 800})
@@ -94,10 +167,12 @@ def start_scrap():
             page = login(page)
 
             # Steps Start
+            
+            # TODO Manage Continue / resume
+            
+            hangle_listing(page, 1, 140, constant.get_url('woman_list_url'), "woman")
 
-
-
-
+            hangle_listing(page, 1, 47, constant.get_url('man_list_url'), "man")
 
 
 
@@ -113,22 +188,24 @@ def start_scrap():
     time_difference = time.time() - start_time
     print(f'Scraping time: %.2f seconds.' % time_difference)   
     print("\n\n\n\n")
-# ________________________________________________________________________________
 
+
+# Starting Point ______________________________________
 configs = load_config()
 
 if __name__ == "__main__":
     start_scrap()
-    print(f"Automatically Start Ordering in {configs['SCHEDULE_DELAY']} minutes")
     print("-" * 40)
+    
+    configs['SCHEDULE_DELAY'] = .01
+    s_delay = configs['SCHEDULE_DELAY'] * 60
 
-    schedule.every(configs['SCHEDULE_DELAY']).minutes.do(start_scrap)
+    schedule.every(s_delay).minutes.do(start_scrap)
 
     while True:
-        rs = schedule.idle_seconds()
-        rm = rs // 60
+        formatted_time = remain_time_text(schedule.idle_seconds())
         
-        sys.stdout.write(f"\rNext call in {int(rm)}:{int(rs-(configs['SCHEDULE_DELAY']*rm))}")
+        sys.stdout.write(f"\rNext call in {formatted_time}")
         sys.stdout.flush()
         
         schedule.run_pending()

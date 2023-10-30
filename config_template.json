@@ -1,4 +1,7 @@
 {
   "USERNAME": "",
-  "PASSWORD": ""
+  "PASSWORD": "",
+  "SCHEDULE_DELAY": 12,
+  "LIST_KEY": "W",
+  "LIST_PAGE": 1
 }
