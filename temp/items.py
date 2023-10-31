@@ -1,5 +1,15 @@
 from helpers import save_items_to_excel  
 
+class Styles():
+    title = ""
+    product_link = ""
+    price = ""
+    msrp = ""
+    list_page_num = ""
+   
+    def __init__(self, sku):
+        self.sku = sku
+
 class Item():
     upc = ""
     sku = ""
@@ -29,6 +39,17 @@ class Item():
     def __init__(self, upc):
         self.upc = upc
     pass
+
+    def save_items_to_excel(data):
+        new_df = pd.DataFrame(data)
+
+        try:
+            existing_df = pd.read_excel(constant.EXCEL_ITEMS_FILE_PATH)
+            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+        except FileNotFoundError:
+            combined_df = new_df
+
+        combined_df.to_excel(constant.EXCEL_ITEMS_FILE_PATH, index=False)
 
     def save_data(self):
         data = {

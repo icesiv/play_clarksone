@@ -1,14 +1,15 @@
 import os
-import re
 import sys
 import json
 import time
 import random
 
+from items_grab import Styles
+
 import schedule
 import constant
 
-import pandas as pd
+from items_grab import grab_items
 
 from datetime import datetime
 from playwright.sync_api import sync_playwright
@@ -97,7 +98,7 @@ def handle_listing(page, start_page, last_page, url, gender):
         if not html:
             continue
         
-        if not parse_items(html, gender, page_num):
+        if not parse_items(html, gender, page_num, page):
             break
 
 def load_list_page(page, url):
@@ -109,14 +110,14 @@ def load_list_page(page, url):
         print("Error: Problem in URL. ",url)
         return None
 
-def parse_items(html, gender, page_num):
+def parse_items(html, gender, page_num,page):
     soup = BeautifulSoup(html, 'html.parser')
     product_tiles = soup.find_all(class_='product-tile')
 
     if len(product_tiles) < 1:
         return False
 
-    data_arr = []
+    styles_arr = []
 
     for product in product_tiles:
         title = product.find(class_='product-tile--name').text.strip()
@@ -129,31 +130,19 @@ def parse_items(html, gender, page_num):
             msrp = price_div.text.strip()
         else:
             msrp = "-"
+            
+        s = Styles(sku)
+        s["title"]= title
+        s["product_link"]= product_link
+        s["price"]= price
+        s["msrp"]= msrp
+        s["page_num"]= page_num
+        s["gender"]= gender
+       
+        styles_arr.append(s)
 
-        data = {
-            "title": title,
-            "product_link": product_link,
-            "sku": sku,
-            "price": price,
-            "msrp": msrp,
-            "list_page_num": page_num,
-            "for": gender
-        }
-
-        data_arr.append(data)
-
-    load_item_details(data_arr)
+    grab_items(styles_arr,page)
     return True
-
-# -----------------------------------------------------
-# load_item_details Function
-# -----------------------------------------------------
-
-def load_item_details(data_arr):
-    
-    items_grab()
-
-
 
 # -----------------------------------------------------
 # Main Function
