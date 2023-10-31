@@ -88,7 +88,7 @@ def login(page):
 # Listing Functions
 # -----------------------------------------------------
 
-def hangle_listing(page, start_page, last_page, url, gender):
+def handle_listing(page, start_page, last_page, url, gender):
     for page_num in range(start_page, last_page+1):
         print("Processing page", page_num)
         list_url = url + str(page_num)
@@ -142,8 +142,18 @@ def parse_items(html, gender, page_num):
 
         data_arr.append(data)
 
-    helpers.save_to_excel(data_arr)
+    load_item_details(data_arr)
     return True
+
+# -----------------------------------------------------
+# load_item_details Function
+# -----------------------------------------------------
+
+def load_item_details(data_arr):
+    
+    items_grab()
+
+
 
 # -----------------------------------------------------
 # Main Function
@@ -170,11 +180,9 @@ def start_scrap():
             
             # TODO Manage Continue / resume
             
-            hangle_listing(page, 1, 140, constant.get_url('woman_list_url'), "woman")
+            handle_listing(page, 1, 140, constant.get_url('woman_list_url'), "woman")
 
-            hangle_listing(page, 1, 47, constant.get_url('man_list_url'), "man")
-
-
+            handle_listing(page, 1, 47, constant.get_url('man_list_url'), "man")
 
 
             # Steps Done
