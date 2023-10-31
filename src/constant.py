@@ -1,7 +1,7 @@
 CONFIG_PATH = '../config.json'
 
 EXCEL_ITEMS_FILE_PATH = 'output_data/output_items.xlsx'
-EXCEL_FILE_PATH = 'output_data/items_list.xlsx'
+# EXCEL_FILE_PATH = 'output_data/items_list.xlsx'
 
 BASE_URL = "https://us.clarksone.com"
 

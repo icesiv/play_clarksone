@@ -1,12 +1,3 @@
-# ToDo
-- 1 Excel file , Bat replaces old scrap with new scrap
-- Scraper has to run twice a day
-- runs / resume auto
-- Scraper needs to collect SKU , Style ,UPC , Quantity Availability , Title , Cost , MSRP. It doesn't hurt to add more information you can see the scrapper I sent you for reference.
-- Try to make it as similar as you can to our current scrapper.
-
-
-
 # HOW TO RUN THIS SCRAPER
 
 1. Download Python 3.6+ from [here](https://www.python.org/downloads/) and install [pip](https://www.geeksforgeeks.org/how-to-install-pip-on-windows/) and [virtualenv](https://www.freecodecamp.org/news/how-to-setup-virtual-environments-in-python/).
@@ -26,3 +17,9 @@
 - `USERNAME` - Username used for login on the website https://sanukus.deckersb2b.deckers.com/#/login
 
 - `PASSWORD` - Password used for login on the website https://sanukus.deckersb2b.deckers.com/#/login
+
+- `SCHEDULE_DELAY` - next run after X hours
+
+- `LIST_KEY` - will be used for resume feature 
+
+- `LIST_PAGE` - will be used for resume feature 

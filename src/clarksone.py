@@ -91,7 +91,10 @@ def login(page):
 
 def handle_listing(page, start_page, last_page, url, gender):
     for page_num in range(start_page, last_page+1):
+        print("\n", "-"*20)
         print("Processing page", page_num)
+        print("\n", "-"*20)
+        
         list_url = url + str(page_num)
         html = load_list_page(page, list_url)
         
@@ -132,12 +135,12 @@ def parse_items(html, gender, page_num,page):
             msrp = "-"
             
         s = Styles(sku)
-        s["title"]= title
-        s["product_link"]= product_link
-        s["price"]= price
-        s["msrp"]= msrp
-        s["page_num"]= page_num
-        s["gender"]= gender
+        s.title = title
+        s.link = product_link
+        s.price = price
+        s.msrp = msrp
+        s.page_num = page_num
+        s.gender = gender
        
         styles_arr.append(s)
 
@@ -194,7 +197,6 @@ if __name__ == "__main__":
     start_scrap()
     print("-" * 40)
     
-    configs['SCHEDULE_DELAY'] = .01
     s_delay = configs['SCHEDULE_DELAY'] * 60
 
     schedule.every(s_delay).minutes.do(start_scrap)

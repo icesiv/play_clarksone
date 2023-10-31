@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 
 class Styles():
     title = ""
-    product_link = ""
+    link = ""
     price = ""
     msrp = ""
     page_num = ""
@@ -91,10 +91,7 @@ class Item():
         }
     
         self.save_items_to_excel(data)
-
-def wait_for_page_to_load(page):
-    page.wait_for_selector('body')
-
+   
 def get_color(c):
     try:
         c = c.replace("\n", "") 
@@ -211,8 +208,10 @@ def get_upc(page, key):
                     
 def get_details(page, styles: Styles):
     full_url = constant.BASE_URL + styles.link
+    print(">>>>" , full_url)
+    
     page.goto(full_url, timeout=350000)
-    wait_for_page_to_load(page)
+    page.wait_for_selector('body')
     
     color = get_color(page.locator("div.product-name").text_content())
     feature_details = get_feature(page.inner_html("(//div[@class='pdp_details_tabs'])[1]"))
@@ -244,7 +243,7 @@ def save_items(items, fit, styles: Styles, color,category_n_brand,feature_detail
         item.gender = styles.gender
         
         item.msrp = styles.msrp
-        item.link = styles.product_link
+        item.link = styles.link
         item.color = color
         item.categorys = category_n_brand[0]
         item.brand = category_n_brand[1]
@@ -261,17 +260,10 @@ def save_items(items, fit, styles: Styles, color,category_n_brand,feature_detail
         item.save_data()
             
 def grab_items(styles_arr, page):
-     with sync_playwright() as p:
-        if page is None: 
-            print("error login")
-            sys.exit()
+    if page is None: 
+        print("error login")
+        sys.exit()
 
-        total = len(styles_arr)
-        
-        for index, style in styles_arr.iterrows():
-            print(f"Getting Item {index+1} of {total}")
-            get_details(page, style)
-            print("*" * 20)
-            
-            if index > 10:
-                break
+    for style in styles_arr:
+        get_details(page, style)
+        print("*" * 20)
